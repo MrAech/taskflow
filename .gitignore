@@ -1,0 +1,90 @@
+# ============================================================
+#  Java / Maven
+# ============================================================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# Maven wrapper
+.mvn/
+!.mvn/wrapper/maven-wrapper.properties
+mvnw
+mvnw.cmd
+
+# ============================================================
+#  IDEs & editors
+# ============================================================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+.factorypath
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ============================================================
+#  OS metadata
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ============================================================
+#  Instructor-only content (must NOT be visible to students)
+# ============================================================
+Documentation/
+scripts/
+issues/
+
+# ============================================================
+#  Credentials & environment
+# ============================================================
+.env
+.env.*
+*.key
+*.pem
+application-local.properties
+application-local.yml
+
+# ============================================================
+#  Test / coverage artefacts
+# ============================================================
+surefire-reports/
+jacoco.exec
+coverage/
+
+# ============================================================
+#  Logs & temporaries
+# ============================================================
+*.log
+*.tmp
+*.swp
+*.swo
+*~
