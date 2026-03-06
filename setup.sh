@@ -53,7 +53,7 @@ else
     sudo apt-get update -qq
     sudo apt-get install -y openjdk-21-jdk
   else
-    die "Please install Java 21 manually and re-run this script."
+    die "Please install Java 21 or later manually (https://adoptium.net) and re-run this script."
   fi
 fi
 

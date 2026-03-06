@@ -28,12 +28,14 @@ echo.
 :: 1. Check Java
 :: -------------------------------------------------------------------------
 echo [INFO]  Checking Java...
-where java >nul 2>&1
+:: Use java directly as the test -- more reliable than 'where java' since
+:: some JDK installers set JAVA_HOME but don't update the WHERE search path.
+java --version >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] Java not found on PATH.
-    echo         Download and install Java 21 from:
+    echo [ERROR] Java not found. 'java' could not be executed.
+    echo         Download and install Java 21+ from:
     echo           https://adoptium.net/temurin/releases/?version=21
-    echo         Then re-run this script.
+    echo         After installing, open a NEW terminal and re-run this script.
     goto :fail
 )
 
@@ -59,8 +61,8 @@ if "!JAVA_MAJOR!"=="1" (
 )
 
 if !JAVA_MAJOR! LSS 21 (
-    echo [WARN]  Java !JAVA_MAJOR! found -- this project requires Java 21+.
-    echo         Download Java 21 from: https://adoptium.net/temurin/releases/?version=21
+    echo [WARN]  Java !JAVA_MAJOR! found -- this project requires Java 21 or later.
+    echo         Download Java 21+ from: https://adoptium.net/temurin/releases/?version=21
     goto :fail
 )
 echo [OK]    Java !JAVA_MAJOR! found.
