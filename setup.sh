@@ -3,9 +3,11 @@
 # Run this once after cloning the repository.
 #
 # What it does:
-#   1. Checks that Java 21+ and Maven 3.x are available (installs via apt if not)
-#   2. Runs an initial build (compile + test) so you can see the current state
-#   3. Prints a getting-started summary
+#   1. Checks that Java 21+ is available (installs via apt if not)
+#   2. Checks that Git is available (installs via apt/brew if not)
+#   3. Checks that Maven 3.x is available (installs via apt if not)
+#   4. Runs an initial build (compile + test) so you can see the current state
+#   5. Prints a getting-started summary
 #
 # Usage:
 #   bash setup.sh
@@ -50,7 +52,26 @@ else
 fi
 
 ###############################################################################
-# 2. Check / install Maven 3.x
+# 2. Check / install Git
+###############################################################################
+info "Checking Git..."
+if command -v git &>/dev/null; then
+  GIT_VER=$(git --version | awk '{print $3}')
+  success "Git $GIT_VER found."
+else
+  warn "Git not found. Attempting to install..."
+  if command -v apt-get &>/dev/null; then
+    sudo apt-get update -qq
+    sudo apt-get install -y git
+  elif command -v brew &>/dev/null; then
+    brew install git
+  else
+    die "Please install Git from https://git-scm.com/downloads and re-run this script."
+  fi
+fi
+
+###############################################################################
+# 3. Check / install Maven 3.x
 ###############################################################################
 info "Checking Maven..."
 if command -v mvn &>/dev/null; then
@@ -67,7 +88,7 @@ else
 fi
 
 ###############################################################################
-# 3. Initial build — compile only (no tests) to confirm the project builds
+# 4. Initial build — compile only (no tests) to confirm the project builds
 ###############################################################################
 info "Running initial compile..."
 cd "$REPO_ROOT"
@@ -79,7 +100,7 @@ else
 fi
 
 ###############################################################################
-# 4. Run the full test suite to show the baseline (many tests will fail)
+# 5. Run the full test suite to show the baseline (many tests will fail)
 ###############################################################################
 info "Running test suite to show your starting baseline..."
 info "(Many tests will FAIL — that is intentional. Your job is to fix the bugs.)"
@@ -87,7 +108,7 @@ echo ""
 mvn test 2>&1 | tail -30 || true   # don't exit on test failure
 
 ###############################################################################
-# 5. Getting-started instructions
+# 6. Getting-started instructions
 ###############################################################################
 echo ""
 echo "======================================================================"
