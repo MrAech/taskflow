@@ -29,10 +29,16 @@ die()     { echo "[ERROR] $*" >&2; exit 1; }
 ###############################################################################
 info "Checking Java..."
 if command -v java &>/dev/null; then
-  JAVA_VER=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-  if [[ "$JAVA_VER" -ge 21 ]]; then
-    success "Java $JAVA_VER found: $(java -version 2>&1 | head -1)"
-  else
+  # java --version (Java 9+) writes to stdout:  openjdk 25 2025-09-16
+  # java -version  (all)    writes to stderr:  openjdk version "21.0.3" ...
+  JAVA_VER=$(java --version 2>/dev/null | head -1 | awk '{print $2}' | grep -oE '^[0-9]+')
+  if [[ -z "$JAVA_VER" ]]; then
+    # Fallback for older JDKs / unusual distributions
+    JAVA_VER=$(java -version 2>&1 | head -1 | grep -oE '"[0-9]+' | grep -oE '[0-9]+')
+  fi
+  if [[ -n "$JAVA_VER" && "$JAVA_VER" -ge 21 ]]; then
+    success "Java $JAVA_VER found."
+  elif [[ -n "$JAVA_VER" ]]; then
     warn "Java $JAVA_VER found but project requires Java 21+. Attempting upgrade..."
     if command -v apt-get &>/dev/null; then
       sudo apt-get update -qq

@@ -37,13 +37,23 @@ if errorlevel 1 (
     goto :fail
 )
 
-:: Read major version from "java -version" output  (goes to stderr)
-for /f "tokens=3 delims= " %%v in ('java -version 2^>^&1 ^| findstr /i "version"') do (
-    set "JAVA_VERSION_STR=%%~v"
+:: --- Parse Java version ---
+:: Strategy 1: java --version  (Java 9+)  writes to stdout
+::   Output:  openjdk 25 2025-09-16   ->  token 2 = 25
+set "JAVA_VERSION_STR="
+for /f "tokens=2 delims= " %%v in ('java --version 2^>nul ^| findstr /r "^[a-zA-Z]"') do (
+    if not defined JAVA_VERSION_STR set "JAVA_VERSION_STR=%%v"
 )
-:: Version string is like  21.0.3  or  1.8.0_xxx
-for /f "tokens=1 delims=." %%m in ("!JAVA_VERSION_STR!") do set "JAVA_MAJOR=%%m"
-:: Older Java reported "1.8" so major=1 means Java 8
+:: Strategy 2: java -version  (all JDKs) writes to stderr
+::   Output:  openjdk version "21.0.3" ...   ->  token 3, strip quotes
+if not defined JAVA_VERSION_STR (
+    for /f "tokens=3 delims= " %%v in ('java -version 2^>^&1 ^| findstr /i "version"') do (
+        set "JAVA_VERSION_STR=%%~v"
+    )
+)
+:: Extract major version: split on '.' AND '-' to handle 21.0.3, 25, 25-ea, etc.
+for /f "tokens=1 delims=.-" %%m in ("!JAVA_VERSION_STR!") do set "JAVA_MAJOR=%%m"
+:: Legacy: Java 8 reports "1.8.x" so major would be "1"
 if "!JAVA_MAJOR!"=="1" (
     for /f "tokens=2 delims=." %%m in ("!JAVA_VERSION_STR!") do set "JAVA_MAJOR=%%m"
 )
