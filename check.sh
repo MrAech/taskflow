@@ -166,8 +166,18 @@ echo "  Running tests for Issue #${ISSUE}..."
 echo "  Filter: ${MVN_FILTER}"
 echo ""
 
+# Auto-detect mvn vs wrapper
+if command -v mvn &>/dev/null; then
+  MVN="mvn"
+elif [[ -x "$REPO_ROOT/mvnw" ]]; then
+  MVN="$REPO_ROOT/mvnw"
+else
+  echo "[ERROR] Neither 'mvn' nor './mvnw' found. Please install Maven or re-clone the repo."
+  exit 1
+fi
+
 cd "$REPO_ROOT"
-if mvn test -Dtest="${MVN_FILTER}" --no-transfer-progress 2>&1; then
+if "$MVN" test -Dtest="${MVN_FILTER}" --no-transfer-progress 2>&1; then
   pass "$ISSUE"
   exit 0
 else

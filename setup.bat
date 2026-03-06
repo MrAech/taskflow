@@ -99,21 +99,26 @@ if errorlevel 1 (
 :git_ok
 
 :: -------------------------------------------------------------------------
-:: 3. Check Maven
+:: 3. Check Maven  (falls back to bundled wrapper mvnw.cmd)
 :: -------------------------------------------------------------------------
 echo [INFO]  Checking Maven...
-where mvn >nul 2>&1
+set "MVN=mvn"
+mvn --version >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] Maven not found on PATH.
-    echo         Option A -- Install Maven manually:
-    echo           https://maven.apache.org/download.cgi
-    echo         Option B -- Use the Maven Wrapper bundled with the project:
-    echo           Replace  "mvn"  with  "mvnw.cmd"  in every command below.
-    goto :fail
-)
-for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1 ^| findstr "Apache Maven"') do (
-    echo [OK]    Maven %%v found.
-    goto :maven_ok
+    if exist "%REPO_ROOT%\mvnw.cmd" (
+        echo [WARN]  mvn not found on PATH -- using bundled Maven Wrapper ^(mvnw.cmd^).
+        set "MVN=%REPO_ROOT%\mvnw.cmd"
+    ) else (
+        echo [ERROR] Maven not found and no wrapper present.
+        echo         Install Maven from https://maven.apache.org/download.cgi
+        echo         or re-clone the repo to restore the wrapper.
+        goto :fail
+    )
+) else (
+    for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1 ^| findstr "Apache Maven"') do (
+        echo [OK]    Maven %%v found.
+        goto :maven_ok
+    )
 )
 :maven_ok
 
@@ -123,7 +128,7 @@ for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1 ^| findstr "Apache Mave
 echo.
 echo [INFO]  Running initial compile...
 cd /d "%REPO_ROOT%"
-call mvn compile -q
+call "!MVN!" compile -q
 if errorlevel 1 (
     echo [WARN]  Compilation had errors.
     echo         Some bugs in this project may prevent a clean compile.
@@ -139,7 +144,7 @@ echo.
 echo [INFO]  Running test suite to show your starting baseline...
 echo [INFO]  (Many tests will FAIL -- that is intentional.)
 echo.
-call mvn test 2>&1
+call "!MVN!" test 2>&1
 :: intentionally ignoring exit code here
 
 :: -------------------------------------------------------------------------
@@ -163,9 +168,9 @@ echo        Example:            check.bat 1
 echo     4. Open a Pull Request -- do NOT merge it yourself
 echo.
 echo   Useful commands:
-echo     check.bat 15           check tests for issue #15
-echo     mvn test               run the full test suite
-echo     mvn compile            quick compile check
+echo     check.bat 15              check tests for issue #15
+echo     !MVN! test                run the full test suite
+echo     !MVN! compile             quick compile check
 echo.
 echo   Rules:
 echo     - Fix only the bug described in your issue

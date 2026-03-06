@@ -11,11 +11,11 @@ target/
 *.tar.gz
 *.rar
 
-# Maven wrapper
-.mvn/
+# Maven wrapper — keep the scripts and properties, ignore downloaded jar
+.mvn/wrapper/maven-wrapper.jar
+!mvnw
+!mvnw.cmd
 !.mvn/wrapper/maven-wrapper.properties
-mvnw
-mvnw.cmd
 scores.csv
 
 # ============================================================

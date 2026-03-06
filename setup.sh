@@ -77,19 +77,24 @@ else
 fi
 
 ###############################################################################
-# 3. Check / install Maven 3.x
+# 3. Check / install Maven 3.x  (falls back to bundled wrapper ./mvnw)
 ###############################################################################
 info "Checking Maven..."
 if command -v mvn &>/dev/null; then
   MVN_VER=$(mvn --version 2>&1 | awk '/Apache Maven/ {print $3}')
   success "Maven $MVN_VER found."
+  MVN="mvn"
+elif [[ -x "$REPO_ROOT/mvnw" ]]; then
+  warn "mvn not on PATH — using bundled Maven Wrapper (./mvnw)."
+  MVN="$REPO_ROOT/mvnw"
 else
   warn "Maven not found. Attempting to install..."
   if command -v apt-get &>/dev/null; then
     sudo apt-get update -qq
     sudo apt-get install -y maven
+    MVN="mvn"
   else
-    die "Please install Maven 3.x manually and re-run this script."
+    die "Maven not found and no wrapper present. Install Maven 3.x from https://maven.apache.org/download.cgi"
   fi
 fi
 
@@ -98,7 +103,7 @@ fi
 ###############################################################################
 info "Running initial compile..."
 cd "$REPO_ROOT"
-if mvn compile -q; then
+if "$MVN" compile -q; then
   success "Project compiled successfully."
 else
   warn "Compilation failed. Some bugs in this project may prevent a clean compile."
@@ -111,7 +116,7 @@ fi
 info "Running test suite to show your starting baseline..."
 info "(Many tests will FAIL — that is intentional. Your job is to fix the bugs.)"
 echo ""
-mvn test 2>&1 | tail -30 || true   # don't exit on test failure
+"$MVN" test 2>&1 | tail -30 || true   # don't exit on test failure
 
 ###############################################################################
 # 6. Getting-started instructions
@@ -135,8 +140,8 @@ echo "    4. Open a Pull Request — do NOT merge it yourself"
 echo ""
 echo "  Useful commands:"
 echo "    ./check.sh 15          # run tests for issue #15"
-echo "    mvn test               # run the full test suite"
-echo "    mvn compile            # quick compile check"
+echo "    $MVN test              # run the full test suite"
+echo "    $MVN compile           # quick compile check"
 echo ""
 echo "  Rules:"
 echo "    - Fix only the bug described in your issue"

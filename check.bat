@@ -110,6 +110,20 @@ if "!TEST_CLASSES!"=="NO_TEST" (
 set "MVN_FILTER=!TEST_CLASSES!"
 
 :: -------------------------------------------------------------------------
+:: Detect mvn vs wrapper
+:: -------------------------------------------------------------------------
+set "MVN=mvn"
+mvn --version >nul 2>&1
+if errorlevel 1 (
+    if exist "%REPO_ROOT%\mvnw.cmd" (
+        set "MVN=%REPO_ROOT%\mvnw.cmd"
+    ) else (
+        echo [ERROR] Neither 'mvn' nor 'mvnw.cmd' found. Please install Maven or re-clone the repo.
+        exit /b 1
+    )
+)
+
+:: -------------------------------------------------------------------------
 :: Run tests
 :: -------------------------------------------------------------------------
 echo.
@@ -117,7 +131,7 @@ echo [INFO]  Running tests for issue #!ISSUE!...
 echo [INFO]  Filter: !MVN_FILTER!
 echo.
 cd /d "%REPO_ROOT%"
-call mvn test "-Dtest=!MVN_FILTER!" --no-transfer-progress 2>&1
+call "!MVN!" test "-Dtest=!MVN_FILTER!" --no-transfer-progress 2>&1
 set "MVN_EXIT=!errorlevel!"
 
 :: -------------------------------------------------------------------------
