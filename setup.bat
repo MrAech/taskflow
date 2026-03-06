@@ -43,14 +43,15 @@ if errorlevel 1 (
 :: Strategy 1: java --version  (Java 9+)  writes to stdout
 ::   Output:  openjdk 25 2025-09-16   ->  token 2 = 25
 set "JAVA_VERSION_STR="
-for /f "tokens=2 delims= " %%v in ('java --version 2^>nul ^| findstr /r "^[a-zA-Z]"') do (
+:: for /f iterates every output line; 'if not defined' keeps only the first match
+for /f "tokens=2 delims= " %%v in ('java --version 2^>nul') do (
     if not defined JAVA_VERSION_STR set "JAVA_VERSION_STR=%%v"
 )
 :: Strategy 2: java -version  (all JDKs) writes to stderr
 ::   Output:  openjdk version "21.0.3" ...   ->  token 3, strip quotes
 if not defined JAVA_VERSION_STR (
-    for /f "tokens=3 delims= " %%v in ('java -version 2^>^&1 ^| findstr /i "version"') do (
-        set "JAVA_VERSION_STR=%%~v"
+    for /f "tokens=3 delims= " %%v in ('java -version 2^>^&1') do (
+        if not defined JAVA_VERSION_STR set "JAVA_VERSION_STR=%%~v"
     )
 )
 :: Extract major version: split on '.' AND '-' to handle 21.0.3, 25, 25-ea, etc.
@@ -115,7 +116,7 @@ if errorlevel 1 (
         goto :fail
     )
 ) else (
-    for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1 ^| findstr "Apache Maven"') do (
+    for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1') do (
         echo [OK]    Maven %%v found.
         goto :maven_ok
     )
