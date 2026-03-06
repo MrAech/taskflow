@@ -4,10 +4,12 @@ setlocal enabledelayedexpansion
 :: Run this once after cloning the repository.
 ::
 :: What it does:
-::   1. Checks that Java 21+ and Maven 3.x are available on PATH
-::   2. Runs an initial build (compile) to confirm the project builds
-::   3. Runs the full test suite to show your starting baseline
-::   4. Prints a getting-started summary
+::   1. Checks that Java 21+ is available on PATH
+::   2. Checks that Git is available (installs via winget if not)
+::   3. Checks that Maven 3.x is available on PATH
+::   4. Runs an initial build (compile) to confirm the project builds
+::   5. Runs the full test suite to show your starting baseline
+::   6. Prints a getting-started summary
 ::
 :: Usage (from project root, Command Prompt or PowerShell):
 ::   setup.bat
@@ -54,7 +56,38 @@ if !JAVA_MAJOR! LSS 21 (
 echo [OK]    Java !JAVA_MAJOR! found.
 
 :: -------------------------------------------------------------------------
-:: 2. Check Maven
+:: 2. Check / install Git
+:: -------------------------------------------------------------------------
+echo [INFO]  Checking Git...
+where git >nul 2>&1
+if errorlevel 1 (
+    echo [WARN]  Git not found on PATH. Attempting to install via winget...
+    where winget >nul 2>&1
+    if errorlevel 1 (
+        echo [ERROR] winget is not available on this machine.
+        echo         Install Git manually from: https://git-scm.com/downloads
+        echo         Then re-run this script.
+        goto :fail
+    )
+    winget install --id Git.Git --silent --accept-package-agreements --accept-source-agreements
+    if errorlevel 1 (
+        echo [ERROR] Automatic Git install failed.
+        echo         Install Git manually from: https://git-scm.com/downloads
+        goto :fail
+    )
+    echo [OK]    Git installed successfully.
+    echo [WARN]  You may need to close and reopen this terminal for git to be on PATH.
+    echo         If the next steps fail, re-run setup.bat in a new terminal.
+) else (
+    for /f "tokens=3 delims= " %%v in ('git --version 2^>^&1') do (
+        echo [OK]    Git %%v found.
+        goto :git_ok
+    )
+)
+:git_ok
+
+:: -------------------------------------------------------------------------
+:: 3. Check Maven
 :: -------------------------------------------------------------------------
 echo [INFO]  Checking Maven...
 where mvn >nul 2>&1
@@ -73,7 +106,7 @@ for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1 ^| findstr "Apache Mave
 :maven_ok
 
 :: -------------------------------------------------------------------------
-:: 3. Initial compile
+:: 4. Initial compile
 :: -------------------------------------------------------------------------
 echo.
 echo [INFO]  Running initial compile...
@@ -88,7 +121,7 @@ if errorlevel 1 (
 )
 
 :: -------------------------------------------------------------------------
-:: 4. Run full test suite (failures expected -- do not exit on failure)
+:: 5. Run full test suite (failures expected -- do not exit on failure)
 :: -------------------------------------------------------------------------
 echo.
 echo [INFO]  Running test suite to show your starting baseline...
@@ -98,7 +131,7 @@ call mvn test 2>&1
 :: intentionally ignoring exit code here
 
 :: -------------------------------------------------------------------------
-:: 5. Instructions
+:: 6. Instructions
 :: -------------------------------------------------------------------------
 echo.
 echo ======================================================================
