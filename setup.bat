@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-:: setup.bat — Student onboarding script for TaskFlow (Windows)
+:: setup.bat -- Student onboarding script for TaskFlow (Windows)
 :: Run this once after cloning the repository.
 ::
 :: What it does:
@@ -22,9 +22,9 @@ echo   TaskFlow -- Setup
 echo ======================================================================
 echo.
 
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 :: 1. Check Java
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 echo [INFO]  Checking Java...
 where java >nul 2>&1
 if errorlevel 1 (
@@ -47,15 +47,15 @@ if "!JAVA_MAJOR!"=="1" (
 )
 
 if !JAVA_MAJOR! LSS 21 (
-    echo [WARN]  Java !JAVA_MAJOR! found — this project requires Java 21+.
+    echo [WARN]  Java !JAVA_MAJOR! found -- this project requires Java 21+.
     echo         Download Java 21 from: https://adoptium.net/temurin/releases/?version=21
     goto :fail
 )
 echo [OK]    Java !JAVA_MAJOR! found.
 
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 :: 2. Check Maven
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 echo [INFO]  Checking Maven...
 where mvn >nul 2>&1
 if errorlevel 1 (
@@ -72,9 +72,9 @@ for /f "tokens=3 delims= " %%v in ('mvn --version 2^>^&1 ^| findstr "Apache Mave
 )
 :maven_ok
 
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 :: 3. Initial compile
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 echo.
 echo [INFO]  Running initial compile...
 cd /d "%REPO_ROOT%"
@@ -87,9 +87,9 @@ if errorlevel 1 (
     echo [OK]    Project compiled successfully.
 )
 
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 :: 4. Run full test suite (failures expected -- do not exit on failure)
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 echo.
 echo [INFO]  Running test suite to show your starting baseline...
 echo [INFO]  (Many tests will FAIL -- that is intentional.)
@@ -97,9 +97,9 @@ echo.
 call mvn test 2>&1
 :: intentionally ignoring exit code here
 
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 :: 5. Instructions
-:: ─────────────────────────────────────────────────────────────────────────
+:: -------------------------------------------------------------------------
 echo.
 echo ======================================================================
 echo   TaskFlow -- Bug-fixing Exercise
